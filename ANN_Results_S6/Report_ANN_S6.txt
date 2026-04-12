@@ -1,0 +1,13 @@
+Report: ANN Optimization cho biến S6
+========================================
+- Đầu vào: ['ThoiGian', 'NongDo', 'TyLe']
+- Mô hình ANN R2-Score: 0.8927
+- Tiêu chí: MAX
+----------------------------------------
+KẾT QUẢ MAX:
+  > Giá trị S6: 432485.2478
+
+Tại Điều Kiện:
+   - ThoiGian  : 147.0000
+   - NongDo    : 80.0000
+   - TyLe      : 7.0000
