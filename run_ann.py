@@ -12,9 +12,6 @@ from sklearn.exceptions import ConvergenceWarning
 
 warnings.filterwarnings("ignore", category=ConvergenceWarning)
 
-# ==========================================
-# 1. CẤU HÌNH THÔNG SỐ (CONFIGURATION)
-# ==========================================
 
 DATA_PATH = "data_ann.xlsx"
 INPUT_COLS = ["ThoiGian", "NongDo", "TyLe"]
@@ -54,7 +51,6 @@ def optimize_for_variable(df, output_col):
     best_model = None
     best_r2 = -float("inf")
     
-    # Sử dụng kiến trúc nơ-ron hẹp để tránh vỡ không gian ngoại suy kết hợp alpha L2 lớn giúp loại bỏ triệt để lỗi Overflow (NaN)
     architectures = [
         (4,), (8,), (12,), (16,), 
         (8, 4), (12, 6), (16, 8)
@@ -68,8 +64,8 @@ def optimize_for_variable(df, output_col):
             hidden_layer_sizes=arch,
             activation='tanh',     
             solver='lbfgs',        
-            alpha=0.2,             # Regularization mạnh chặn đứng lỗi NaN / Overflow ở Grid Search
-            max_iter=1500,         # Hạn chế epoch để tránh thổi phồng weights
+            alpha=0.2,             
+            max_iter=1500,       
             random_state=attempt
         )
         model.fit(X_scaled, y_scaled.ravel())
@@ -81,18 +77,12 @@ def optimize_for_variable(df, output_col):
             best_model = model
             
         if best_r2 >= 0.80:
-            print(f"✅ Đạt R2 = {best_r2:.4f} tại lần thử thứ {attempt+1} với kiến trúc {arch}.")
             break
             
-    if best_r2 < 0.80:
-        print(f"⚠️ Cảnh báo: R2 tối đa đạt được là {best_r2:.4f} sau {max_attempts} lần thử (chưa đạt yêu cầu 0.80).")
-        
+
     model = best_model
     r2_ann = best_r2
 
-    # ==========================================
-    # TÌM ĐIỂM TỐI ƯU BẰNG GRID SEARCH
-    # ==========================================
     print(f"\n--- Đang tạo lưới không gian phân tích tìm cực trị ({TARGET_GOAL})...")
     
     input_ranges = [np.linspace(df_clean[c].min(), df_clean[c].max(), GRID_RESOLUTION) for c in INPUT_COLS]
@@ -125,7 +115,6 @@ def optimize_for_variable(df, output_col):
     print(f"\n{'='*40}")
     print(f" ĐIỀU KIỆN TỐI ƯU CHO MỤC TIÊU CỰC TRỊ: {TARGET_GOAL} {output_col}")
     print(f"{'='*40}")
-    print(f"👉 {output_col} mong đợi đạt: {best_y:.4f}\n")
     
     for i, col in enumerate(INPUT_COLS):
         print(f"   - [{col:10s}]: {best_X[i]:.4f}")
@@ -136,9 +125,7 @@ def optimize_for_variable(df, output_col):
         f.write(report_text)
     print(f"  -> Đã lưu Report tại {report_file}")
         
-    # ==========================================
-    # TRỰC QUAN HOÁ 3D & CONTOUR
-    # ==========================================
+
     if input_dim >= 2:
         print("--- Đang vẽ bản đồ không gian Bề Mặt (Surface) & Vệ Tinh (Contour)...")
         pairs = list(itertools.combinations(range(len(INPUT_COLS)), 2))
@@ -217,7 +204,6 @@ def main():
     for out_col in OUTPUT_COLS:
         optimize_for_variable(df, out_col)
         
-    print("\n✅ Hoàn thành toàn bộ quá trình tối ưu ANN cho tất cả các biến!")
 
 if __name__ == "__main__":
     main()
